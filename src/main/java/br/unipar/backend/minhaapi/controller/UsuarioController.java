@@ -1,6 +1,7 @@
 package br.unipar.backend.minhaapi.controller;
 
 import br.unipar.backend.minhaapi.model.Usuario;
+import br.unipar.backend.minhaapi.repository.UsuarioRepository;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -12,6 +13,12 @@ import java.util.List;
 public class UsuarioController {
 
     List<Usuario> usuarios = new ArrayList<>(); //simulando nosso banco de dados
+    private final UsuarioRepository usuarioRepository;
+
+    public UsuarioController(UsuarioRepository usuarioRepository) {
+        this.usuarioRepository = usuarioRepository;
+    }
+
 
     @GetMapping("/hello/{nome}") //Get é o nosso metodo de captura, ele vai receber alguma no nosso caso enviar
     public String helloWorld(@PathVariable String nome) {
@@ -30,7 +37,7 @@ public class UsuarioController {
 
     @GetMapping("/listar-usuarios")
     public ResponseEntity<List<Usuario>> listarUsuarios() {
-        return ResponseEntity.ok(usuarios);
+        return ResponseEntity.ok(usuarioRepository.findAll());
     }
 
     @PostMapping("/criar-usuario")
@@ -38,27 +45,28 @@ public class UsuarioController {
         if (usuario == null) {
             return ResponseEntity.badRequest().build();
         } else {
-            usuarios.add(usuario);
+            //usuarios.add(usuario);
+            usuarioRepository.save(usuario);
             return ResponseEntity.ok(usuario);
         }
     }
 
-    @PutMapping("/editar-usuario/{posicao}")
-    public ResponseEntity<Usuario> editarUsuario(@PathVariable int posicao,
+    @PutMapping("/editar-usuario/{id}")
+    public ResponseEntity<Usuario> editarUsuario(@PathVariable int id,
                                                  @RequestBody Usuario usuario) {
-        Usuario u = usuarios.get(posicao);
+        Usuario u = usuarioRepository.findById(id).get();
         u.setNome(usuario.getNome());
         u.setEmail(usuario.getEmail());
-        usuarios.set(posicao, u);
+        usuarioRepository.save(u);
 
         return ResponseEntity.ok(u);
 
     }
 
-    @DeleteMapping("/deletar-usuario/{posicao}")
-    public ResponseEntity deletarUsuario(@PathVariable int posicao) {
-        usuarios.remove(posicao);
-        return ResponseEntity.ok("Usuário "+ posicao + " deletado com sucesso!");
+    @DeleteMapping("/deletar-usuario/{id}")
+    public ResponseEntity deletarUsuario(@PathVariable int id) {
+        usuarioRepository.deleteById(id);
+        return ResponseEntity.ok("Usuário "+ id + " deletado com sucesso!");
     }
 
     @PostMapping("/login") //Post é o metodo de gravacao, ele vai persistir algo, geralmente vem por request param
