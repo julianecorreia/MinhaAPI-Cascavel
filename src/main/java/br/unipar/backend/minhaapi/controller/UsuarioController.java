@@ -43,6 +43,23 @@ public class UsuarioController {
         }
     }
 
+    @PutMapping("/editar-usuario/{posicao}")
+    public ResponseEntity<Usuario> editarUsuario(@PathVariable int posicao,
+                                                 @RequestBody Usuario usuario) {
+        Usuario u = usuarios.get(posicao);
+        u.setNome(usuario.getNome());
+        u.setEmail(usuario.getEmail());
+        usuarios.set(posicao, u);
+
+        return ResponseEntity.ok(u);
+
+    }
+
+    @DeleteMapping("/deletar-usuario/{posicao}")
+    public ResponseEntity deletarUsuario(@PathVariable int posicao) {
+        usuarios.remove(posicao);
+        return ResponseEntity.ok("Usuário "+ posicao + " deletado com sucesso!");
+    }
 
     @PostMapping("/login") //Post é o metodo de gravacao, ele vai persistir algo, geralmente vem por request param
     public String login(@RequestParam String login,@RequestParam String senha) {
