@@ -1,5 +1,6 @@
 package br.unipar.backend.minhaapi.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -19,6 +20,7 @@ public class Divida {
     private BigDecimal valor;
 
     @ManyToOne //varias dividas podem ser de apenas um usuario
+    @JsonIgnore
     private Usuario usuario;
 
 }

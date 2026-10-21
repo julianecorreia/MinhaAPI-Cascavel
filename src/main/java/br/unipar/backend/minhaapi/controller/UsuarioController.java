@@ -1,6 +1,8 @@
 package br.unipar.backend.minhaapi.controller;
 
+import br.unipar.backend.minhaapi.model.Divida;
 import br.unipar.backend.minhaapi.model.Usuario;
+import br.unipar.backend.minhaapi.repository.DividaRepository;
 import br.unipar.backend.minhaapi.repository.UsuarioRepository;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -14,9 +16,11 @@ public class UsuarioController {
 
     List<Usuario> usuarios = new ArrayList<>(); //simulando nosso banco de dados
     private final UsuarioRepository usuarioRepository;
+    private final DividaRepository dividaRepository;
 
-    public UsuarioController(UsuarioRepository usuarioRepository) {
+    public UsuarioController(UsuarioRepository usuarioRepository, DividaRepository dividaRepository) {
         this.usuarioRepository = usuarioRepository;
+        this.dividaRepository = dividaRepository;
     }
 
 
@@ -49,6 +53,25 @@ public class UsuarioController {
             usuarioRepository.save(usuario);
             return ResponseEntity.ok(usuario);
         }
+    }
+
+    @PostMapping("/{id}/dividas")
+    public ResponseEntity<String> gravarDivida(@PathVariable Integer id,
+                                               @RequestBody(required = false) Divida divida) {
+
+        if (divida == null || divida.getDescricao() == null || divida.getDescricao().isBlank()
+                || divida.getValor() == null || divida.getValor().signum() <= 0) {
+            return ResponseEntity.badRequest().body("Informe descrição e valor positivo.");
+        }
+
+        Usuario usuario = usuarioRepository.findById(id).orElse(null);
+        if (usuario == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        divida.setUsuario(usuario);
+        Divida salva = dividaRepository.save(divida);
+        return ResponseEntity.ok("Divida " + salva.getId() + " gravada para o usuario " + id + ".");
     }
 
     @PutMapping("/editar-usuario/{id}")
